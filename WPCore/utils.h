@@ -32,6 +32,9 @@ namespace utils
 
     std::string string_join(const std::vector<std::string> &parts, std::string_view delim);
 
+    // Rounds a temperature to whole degrees and returns it as text with an explicit sign: "+3", "-5", "0"
+    std::string rounded_temperature(double value);
+
     std::string_view get_direction_text(std::string_view compass_code);
     std::string_view get_precipitation_text(std::string_view type_code);
 }

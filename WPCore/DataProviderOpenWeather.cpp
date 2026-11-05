@@ -24,6 +24,11 @@ namespace
         }
     }
 
+    // temperature rounded to whole degrees
+    std::string jsonGetTemperature(yyjson_val *j_val, const char *key) {
+        return utils::rounded_temperature(yyjson_get_num(yyjson_obj_get(j_val, key)));
+    }
+
     using UnitType = DataProviderOpenWeather::UnitType;
     using Config = DataProviderOpenWeather::Config;
     using RealtimeWeather = DataProviderOpenWeather::RealtimeWeather;
@@ -158,8 +163,8 @@ namespace
             // temperature & humidity
             if (auto *j_main = yyjson_obj_get(j_root, "main"); 
                 j_main != nullptr) {
-                rt_weather.temp = jsonGetNumberAsStr1dp(j_main, "temp");
-                rt_weather.temp_feels_like = jsonGetNumberAsStr1dp(j_main, "feels_like");
+                rt_weather.temp = jsonGetTemperature(j_main, "temp");
+                rt_weather.temp_feels_like = jsonGetTemperature(j_main, "feels_like");
                 rt_weather.humidity = std::to_string(jvh::getInt(j_main, "humidity"));
             }
 
@@ -216,8 +221,8 @@ namespace
                 // temprature
                 if (auto *j_temp = yyjson_obj_get(j_fc_weahter, "temp"); 
                     j_temp != nullptr) {
-                    fc_weather.temp_max = jsonGetNumberAsStr1dp(j_temp, "max");
-                    fc_weather.temp_min = jsonGetNumberAsStr1dp(j_temp, "min");
+                    fc_weather.temp_max = jsonGetTemperature(j_temp, "max");
+                    fc_weather.temp_min = jsonGetTemperature(j_temp, "min");
                 }
 
                 // humidity
@@ -311,8 +316,8 @@ namespace
                 }
 
                 //temperature
-                rt_weathe.temp = jsonGetNumberAsStr1dp(j_current, "temp");
-                rt_weathe.temp_feels_like = jsonGetNumberAsStr1dp(j_current, "feels_like");
+                rt_weathe.temp = jsonGetTemperature(j_current, "temp");
+                rt_weathe.temp_feels_like = jsonGetTemperature(j_current, "feels_like");
 
                 // humidity & uvi
                 rt_weathe.humidity = jsonGetNumberAsStr1dp(j_current, "humidity");
@@ -411,8 +416,8 @@ namespace
                 // temperature
                 if (auto *j_temp = yyjson_obj_get(j_daily_fcw, "temp");
                     j_temp != nullptr) {
-                    fc_weather.temp_max = jsonGetNumberAsStr1dp(j_temp, "max");
-                    fc_weather.temp_min = jsonGetNumberAsStr1dp(j_temp, "min");
+                    fc_weather.temp_max = jsonGetTemperature(j_temp, "max");
+                    fc_weather.temp_min = jsonGetTemperature(j_temp, "min");
                 }
 
                 // humidity & uvi

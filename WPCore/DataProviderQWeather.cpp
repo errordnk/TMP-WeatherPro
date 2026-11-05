@@ -99,6 +99,12 @@ namespace
         return std::vformat(fmt_str, std::make_format_args(value, unit));
     }
 
+    // temperature rounded to whole degrees, followed by the unit
+    std::string parseTemperature(yyjson_val *j_parent, const char *key) {
+        auto *j_obj = yyjson_obj_get(j_parent, key);
+        return utils::rounded_temperature(jvh::getNumber(j_obj, "value")) + std::string{ jvh::getStringView(j_obj, "unit") };
+    }
+
     std::string formatWind(const std::string_view direction,
                            const std::string_view speed,
                            const std::string_view scale,
@@ -194,8 +200,8 @@ namespace
 
         auto parse_func = [&rt_weather](yyjson_val *j_root) {
             // temperature
-            rt_weather.temp = parseValueUnit(j_root, "temperature");
-            rt_weather.temp_feels_like = parseValueUnit(j_root, "feelsLike");
+            rt_weather.temp = parseTemperature(j_root, "temperature");
+            rt_weather.temp_feels_like = parseTemperature(j_root, "feelsLike");
             
             // update time
             {
@@ -307,16 +313,16 @@ namespace
         auto parse_func = [&fc_weather_3d](yyjson_val *j_root) {
             auto parse_daily_data = [](yyjson_val *j_daily_data, ForecastedWeather &fc_weather) {
                 // temperature
-                fc_weather.temp_max = parseValueUnit(j_daily_data, "temperatureMax");
-                fc_weather.temp_min = parseValueUnit(j_daily_data, "temperatureMin");
+                fc_weather.temp_max = parseTemperature(j_daily_data, "temperatureMax");
+                fc_weather.temp_min = parseTemperature(j_daily_data, "temperatureMin");
 
                 // uv index
                 fc_weather.uv_index = std::to_string(jvh::getInt(j_daily_data, "uvIndexMax"));
 
                 auto parse_data_block = [](yyjson_val *j_block, ForecastedWeather::DataBlock &data_block) {
                     // temperature
-                    data_block.temp_max = parseValueUnit(j_block, "temperatureMax");
-                    data_block.temp_min = parseValueUnit(j_block, "temperatureMin");
+                    data_block.temp_max = parseTemperature(j_block, "temperatureMax");
+                    data_block.temp_min = parseTemperature(j_block, "temperatureMin");
 
                     // weather
                     auto *j_weather = yyjson_obj_get(j_block, "condition");

@@ -1,6 +1,7 @@
 ﻿#include "utils.h"
 #include "AppLocale.h"
 
+#include <cmath>
 #include <format>
 #include <chrono>
 #include <sstream>
@@ -225,6 +226,14 @@ namespace utils
 
         const auto utc_seconds = parse_iso_datetime_to_utc_seconds(iso_datatime);
         return current_zone()->to_local(sys_seconds{ seconds{ utc_seconds } }).time_since_epoch().count();
+    }
+
+    std::string rounded_temperature(double value) {
+        const auto rounded = std::round(value);
+        if (rounded == 0.0) {
+            return "0";         // no sign for zero (and no "-0")
+        }
+        return std::format("{:+.0f}", rounded);
     }
 
     std::string string_join(const std::vector<std::string> &parts, std::string_view delim) {

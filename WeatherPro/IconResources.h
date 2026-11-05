@@ -14,6 +14,11 @@ public:
 
     virtual bool Draw(CDC &dc, const CRect& dest_rect, int row, int col) const = 0;
     virtual bool Draw(CDC &dc, const CRect& dest_rect, int index) const = 0;
+    // dark_background: false if the icon is drawn on a light background. Sheets with a variant for light
+    // backgrounds (e.g. light clouds that would be invisible) draw it; other sheets ignore the flag.
+    virtual bool Draw(CDC &dc, const CRect& dest_rect, int index, bool dark_background) const {
+        return Draw(dc, dest_rect, index);
+    }
 
     [[nodiscard]] virtual int GetCols() const = 0;
     [[nodiscard]] virtual int GetRows() const = 0;

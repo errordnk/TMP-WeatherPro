@@ -257,7 +257,8 @@ namespace
         return model;
     }
 
-    LayoutResult BuildLayout(int x, int y, int w, int h, bool dual_line, bool has_icon, int taskbar_wnd_dpi) {
+    // text_height: height of the text in the font of the taskbar window; in single line mode the icon is as high as the text
+    LayoutResult BuildLayout(int x, int y, int w, int h, bool dual_line, bool has_icon, int taskbar_wnd_dpi, int text_height) {
         LayoutResult layout;
         layout.dual_line = dual_line;
 
@@ -268,7 +269,7 @@ namespace
         int text_left = x;
 
         if (has_icon) {
-            const auto icon_size = dual_line ? pixel_size_32 : pixel_size_16;
+            const auto icon_size = dual_line ? pixel_size_32 : (text_height > 0 ? text_height : pixel_size_16);
             const auto icon_y = y + std::max(0, h - icon_size) / 2;
 
             CRect rc_icon{
@@ -315,7 +316,7 @@ namespace
         return layout;
     }
 
-    void DrawIcon(CDC& dc, const CRect& rc_icon, const IconModel& icon, const WeatherApi& api) {
+    void DrawIcon(CDC& dc, const CRect& rc_icon, const IconModel& icon, const WeatherApi& api, bool dark_mode) {
         static int loading_frame_idx{ 0 };
 
         switch (icon.kind) {
@@ -339,7 +340,7 @@ namespace
                     return;
                 }
 
-                icon_res->Draw(dc, rc_icon, icon.weather_icon_index);
+                icon_res->Draw(dc, rc_icon, icon.weather_icon_index, dark_mode);
                 return;
             }
         }
@@ -514,13 +515,14 @@ void MainItem::DrawItem(void* hDC, int x, int y, int w, int h, bool dark_mode) {
     auto model = BuildRenderModel(is_updating, dual_line_mode, snapshot_ptr, api, cfg);
 
     const bool has_icon = model.icon.kind != IconKind::None;
-    auto layout = BuildLayout(x, y, w, h, dual_line_mode, has_icon, taskbar_wnd_dpi);
+    const int text_height = borrowed_dc.get().GetTextExtent(L"0").cy;
+    auto layout = BuildLayout(x, y, w, h, dual_line_mode, has_icon, taskbar_wnd_dpi, text_height);
 
     real_width = std::max(borrowed_dc.get().GetTextExtent(model.text.line1).cx,
                           borrowed_dc.get().GetTextExtent(model.text.line2).cx);
 
     if (layout.icon_rect.has_value()) {
-        DrawIcon(borrowed_dc.get(), *layout.icon_rect, model.icon, api);
+        DrawIcon(borrowed_dc.get(), *layout.icon_rect, model.icon, api, dark_mode);
 
         if (model.draw_notification_dot) {
             DrawNotificationDot(borrowed_dc.get(), *layout.icon_rect);

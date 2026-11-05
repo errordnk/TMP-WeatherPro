@@ -213,17 +213,7 @@ namespace
                 if (doc != nullptr) {
                     auto *root = yyjson_doc_get_root(doc.get());
 
-                    auto toWString1dp = [](double value) {
-                        // 四舍五入到 1 位小数，如果小数为0则返回整数部分
-                        if (double rounded = std::round(value * 10.0) / 10.0;
-                            std::abs(rounded - std::round(rounded)) < 1e-9) {
-                            return std::format("{:.0f}", rounded);
-                        } else {
-                            return std::format("{:.1f}", rounded);
-                        }
-                    };
-
-                    rt_weather.temp = toWString1dp(yyjson_get_real(yyjson_obj_get(root, "temp")));
+                    rt_weather.temp = utils::rounded_temperature(yyjson_get_real(yyjson_obj_get(root, "temp")));
                     rt_weather.update_time = jvh::getString(root, "time");
                     rt_weather.weather_text = jvh::getString(root, "weather");
                     rt_weather.weather_code = convWeatherTextToCode(rt_weather.weather_text);
